@@ -4,10 +4,10 @@ import Model.*;
 import Model.Character;
 import javafx.scene.Node;
 import javafx.geometry.Point2D;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -22,17 +22,16 @@ public class DataController {
     private Character character;
     private Collectibles collectibles;
     private Shot shot;
-    private List<Node> shots;
     private Enemy enemy;
     private Node collectible;
+    private HashMap<Node, String> shotsMap;
 
     public DataController(StatusController statusController, Character character) {
         this.statusController = statusController;
-        Image enemyImage = new Image("images/Object_10.png");
+        shotsMap = new HashMap<Node, String>();
         initialCollectiblesList = new ArrayList<>();
         levelData = new LevelData();
         collectibles = new Collectibles();
-        shots = new ArrayList<>();
         shot = new Shot();
         enemy = new Enemy();
         enemies = new ArrayList<>();
@@ -47,15 +46,8 @@ public class DataController {
         System.out.println("X - " + randomX + "; Y - " + randomY);
     }
 
-    public ImageView createEnemy(){
-        int randomX = ThreadLocalRandom.current().nextInt(levelData.getLevelWidth() + 1);
-        int randomY = ThreadLocalRandom.current().nextInt(levelData.getLevelHeight() + 1);
-        ImageView singleEnemy = enemy.createEnemy(randomX, randomY, 80, 80, "images/pigeon.png");
-        enemies.add(singleEnemy);
-        return singleEnemy;
-    }
 
-    public ImageView createEnemy(int x, int y){
+    public ImageView createEnemy(int x, int y) {
         ImageView singleEnemy = enemy.createEnemy(x, y, 80, 80, "images/pigeon.png");
         enemies.add(singleEnemy);
         return singleEnemy;
@@ -67,40 +59,26 @@ public class DataController {
 
     public void createCollectiblesOnTrees() {
         for (Node tree : trees) {
-            initialCollectiblesList.add(collectibles.createCollectible((int)tree.getTranslateX() + 40, (int) tree.getTranslateY() + 20, statusController.getCollectibleImageA()));
-            initialCollectiblesList.add(collectibles.createCollectible((int)tree.getTranslateX() + 80, (int) tree.getTranslateY() + 40, statusController.getCollectibleImageA()));
+            initialCollectiblesList.add(collectibles.createCollectible((int) tree.getTranslateX() + 40, (int) tree.getTranslateY() + 20, statusController.getCollectibleImageA()));
+            initialCollectiblesList.add(collectibles.createCollectible((int) tree.getTranslateX() + 80, (int) tree.getTranslateY() + 40, statusController.getCollectibleImageA()));
         }
     }
 
-    public ImageView createShot(){
+    public ImageView createShot() {
         ImageView singleShot = shot.createShot((int) character.getCharacter().getTranslateX(), (int) character.getCharacter().getTranslateY(), 30, 30, "images/coll.png");
-        shots.add(singleShot);
         return singleShot;
     }
 
-    public void addToShotsList(Node shot){
-        shots.add(shot);
+    public void addToShotsMap(Node shot, String turn) {
+        shotsMap.put(shot, turn);
     }
 
-    public List<Node> getShotsList(){
-        return shots;
+    public HashMap<Node, String> getShotsMap() {
+        return shotsMap;
     }
 
-    public void setShotsList(List<Node> shotsList){
-        this.shots = shotsList;
-    }
-
-    public Shot getShot() {
-        return shot;
-    }
-
-    public boolean checkIntersectTree() {
-        boolean isColliding = false;
-        for (Node tree : trees) {
-            if (character.getCharacter().getBoundsInParent().intersects(tree.getBoundsInParent()))
-                isColliding = true;
-        }
-        return isColliding;
+    public void setShotsMap(HashMap<Node, String> newHashMap) {
+        this.shotsMap = new HashMap<Node, String>(newHashMap);
     }
 
     public boolean checkForFalling() {
@@ -115,19 +93,7 @@ public class DataController {
         return drowned;
     }
 
-    public boolean checkIntersectCollect() {
-        boolean isColliding = false;
-        for (Node collectible : initialCollectiblesList) {
-            if (character.getCharacter().getBoundsInParent().intersects(collectible.getBoundsInParent())) {
-                isColliding = true;
-                setNodeFromCollision(collectible);
-            }
-        }
-        return isColliding;
-    }
-
-
-    private void setNodeFromCollision(Node collectible) {
+    public void setNodeFromCollision(Node collectible) {
         this.collectible = collectible;
     }
 
@@ -176,7 +142,11 @@ public class DataController {
         return levelData.getLevelHeight();
     }
 
-    public Character getCharacter() {
+    public Character getCharacterClass() {
         return character;
+    }
+
+    public Shot getShotClass(){
+        return shot;
     }
 }

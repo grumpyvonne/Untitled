@@ -1,6 +1,7 @@
 package View;
 
 import Controller.BehaviorController;
+import Controller.CollisionController;
 import Controller.DataController;
 import Controller.StatusController;
 import Model.Character;
@@ -16,22 +17,20 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-
 
 public class GameView {
     private Pane mainPane;
     private Pane uiRoot;
-    private Pane gameEntitiesRoot;
-    private Pane shotsPane;
-    private Pane enemiesPane;
+    public Pane gameEntitiesRoot;
+    public Pane shotsPane;
+    public Pane enemiesPane;
     private Stage gameStage;
     private Scene gameScene;
     private Node background;
     private DataController dataController;
     private StatusController statusController;
     private BehaviorController behaviorController;
+    private CollisionController collisionController;
     private Character character;
     private UiView uiView;
     private HashMap<KeyCode, Boolean> keys = new HashMap<KeyCode, Boolean>();
@@ -41,13 +40,14 @@ public class GameView {
     public GameView() {
         character = new Character(0, 620, 40, 40, "images/Object_11.png");
         statusController = new StatusController();
+        uiView = new UiView(this.statusController);
         dataController = new DataController(statusController, character);
         behaviorController = new BehaviorController(dataController);
+        collisionController = new CollisionController(dataController, this.behaviorController, this.statusController, this, this.uiView);
         mainPane = new Pane();
         gameScene = new Scene(mainPane, 1280, 720);
         gameStage = new Stage();
         gameStage.setScene(gameScene);
-        uiView = new UiView(this.statusController);
         uiRoot = uiView.getUiRoot();
         gameEntitiesRoot = new Pane();
         shotsPane = new Pane();
@@ -79,7 +79,7 @@ public class GameView {
         return keys.getOrDefault(key, false);
     }
 
-    private boolean checkIfPressed(KeyCode keyCode) {
+    public boolean checkIfPressed(KeyCode keyCode) {
         Boolean isActive = keys.get(keyCode);
         if (isActive != null && isActive) {
             keys.put(keyCode, false);
@@ -121,8 +121,8 @@ public class GameView {
             public void handle(long l) {
                 keysListeners();
                 updateCharacterMovement();
-                checkCollisions();
-                checkCharacterInteraction();
+                collisionController.checkCollisions();
+                collisionController.checkCharacterInteraction();
                 createEnemy();
                 if (checkDeath()) {
                     uiView.removeLife();
@@ -146,9 +146,13 @@ public class GameView {
     private void updateCharacterMovement() {
         if (keyIsPressed(KeyCode.D) && behaviorController.getCharacter().getTranslateX() + 40 <= dataController.getLevelWidth() - 5) {
             behaviorController.moveX(5, behaviorController.getCharacter());
+            behaviorController.setMovingRight(true);
+            behaviorController.setMovingLeft(false);
         }
         if (keyIsPressed(KeyCode.A) && behaviorController.getCharacter().getTranslateX() >= 5) {
             behaviorController.moveX(-5, behaviorController.getCharacter());
+            behaviorController.setMovingLeft(true);
+            behaviorController.setMovingRight(false);
         }
         if (keyIsPressed(KeyCode.SPACE) && behaviorController.getCharacter().getTranslateY() >= 5) {
             behaviorController.jumpCharacter();
@@ -163,10 +167,6 @@ public class GameView {
         behaviorController.moveCharacterY((int) behaviorController.getCharacterGravity().getY());
     }
 
-    private void checkCharacterInteraction() {
-        checkForShooting();
-    }
-
     private void createEnemy() {
         time += 0.016;
         if (time > 10) {
@@ -176,58 +176,6 @@ public class GameView {
         if (time > 10) {
             time = 0;
         }
-    }
-
-    private void checkForShooting() {
-        if (checkIfPressed(KeyCode.F)) {
-            if (statusController.getCollectiblesCount() > 0) {
-                uiView.removeCollectible();
-                ImageView shotUi = dataController.createShot();
-                dataController.addToShotsList(shotUi);
-                shotsPane.getChildren().add(shotUi);
-            }
-        }
-        for (Node shot : dataController.getShotsList()) {
-            dataController.getShot().moveRight(shot, 3);
-            checkCollisionShot();
-            checkCollisionShotEnemy(shot);
-        }
-    }
-
-    private void checkCollisionShot() {
-        for (Node platform : dataController.getPlatforms()) {
-            shotsPane.getChildren().removeIf(someShot -> someShot.getBoundsInParent().intersects(platform.getBoundsInParent()));
-//            List<Node> newShotsList = dataController.getShotsList();
-//            newShotsList.removeIf(someShot -> someShot.getBoundsInParent().intersects(platform.getBoundsInParent()));
-//            dataController.setShotsList(newShotsList);
-        }
-        for (Node tree : dataController.getTrees()) {
-            shotsPane.getChildren().removeIf(someShot -> someShot.getBoundsInParent().intersects(tree.getBoundsInParent()));
-        }
-    }
-
-    private void checkCollisionShotEnemy(Node shot) {
-        for (Iterator<Node> iterator = enemiesPane.getChildren().iterator(); iterator.hasNext(); ) {
-            Node pigeon = iterator.next();
-            if (pigeon.getBoundsInParent().intersects(shot.getBoundsInParent())) {
-                iterator.remove();
-                shotsPane.getChildren().remove(shot);
-            }
-        }
-    }
-
-    private void checkCollisions() {
-        if (dataController.checkIntersectTree() && checkIfPressed(KeyCode.ENTER)) {
-            uiView.addLife();
-        }
-        if (dataController.checkIntersectCollect() && checkIfPressed(KeyCode.E)) {
-            uiView.addCollectible();
-            gameEntitiesRoot.getChildren().remove(dataController.getCollectibleFromCollision());
-            List<Node> newCollectiblesList = dataController.getInitialCollectiblesList();
-            newCollectiblesList.remove(dataController.getCollectibleFromCollision());
-            dataController.setInitialCollectiblesList(newCollectiblesList);
-        }
-
     }
 
     private boolean checkDeath() {

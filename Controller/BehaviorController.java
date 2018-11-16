@@ -1,17 +1,43 @@
 package Controller;
 
 import Model.Character;
+import Model.Shot;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
-import javafx.scene.layout.Pane;
 
 public class BehaviorController {
     private DataController dataController;
     private Character character;
+    private Shot shot;
+    private boolean movingLeft = false;
+    private boolean movingRight = false;
+
+    public void setMovingLeft(boolean isMoving){
+        movingLeft = isMoving;
+    }
+    public void setMovingRight(boolean isMoving){
+        movingRight = isMoving;
+    }
+
+    public boolean getMovingLeft(){
+        return movingLeft;
+    }
+    public boolean getMovingRight(){
+        return movingRight;
+    }
 
     public BehaviorController(DataController dataController){
         this.dataController = dataController;
-        this.character = dataController.getCharacter();
+        this.character = dataController.getCharacterClass();
+        this.shot = dataController.getShotClass();
+    }
+
+    public void moveShotLeft(Node singleShot, int speed){
+        shot.moveLeft(singleShot, speed);
+    }
+
+    public void moveShotRight(Node singleShot, int speed){
+        shot.moveRight(singleShot, speed);
     }
 
     public void moveX(int value, Node node) {
