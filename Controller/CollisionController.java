@@ -2,13 +2,11 @@ package Controller;
 
 import View.GameView;
 import View.UiView;
+import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.input.KeyCode;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class CollisionController {
     private DataController dataController;
@@ -16,14 +14,18 @@ public class CollisionController {
     private StatusController statusController;
     private GameView gameView;
     private UiView uiView;
-    public CollisionController(DataController dataController, BehaviorController behaviorController, StatusController statusController, GameView gameView, UiView uiView){
+    private double collisionTime = 0;
+    private Node collidedPigeon;
+
+    public CollisionController(DataController dataController, BehaviorController behaviorController, StatusController statusController, GameView gameView, UiView uiView) {
         this.dataController = dataController;
         this.behaviorController = behaviorController;
         this.statusController = statusController;
         this.gameView = gameView;
         this.uiView = uiView;
     }
-    public boolean checkIntersectCollect() {
+
+    public boolean checkIntersectCollectible() {
         boolean isColliding = false;
         for (Node collectible : dataController.getInitialCollectiblesList()) {
             if (dataController.getCharacterClass().getCharacter().getBoundsInParent().intersects(collectible.getBoundsInParent())) {
@@ -34,53 +36,81 @@ public class CollisionController {
         return isColliding;
     }
 
-    public boolean checkIntersectTree() {
-        boolean isColliding = false;
-        for (Node tree : dataController.getTrees()) {
-            if (dataController.getCharacterClass().getCharacter().getBoundsInParent().intersects(tree.getBoundsInParent()))
-                isColliding = true;
-        }
-        return isColliding;
-    }
-    public void checkCollisions() {
-        if (checkIntersectTree() && gameView.checkIfPressed(KeyCode.ENTER)) {
+    public void checkCollectingResources() {
+        if (statusController.getScore() >= 100 && gameView.checkIfPressed(KeyCode.ENTER) && statusController.getLivesCount() < 3) {
             uiView.addLife();
+            statusController.setScore(statusController.getScore() - 100);
+            uiView.updateScore();
         }
-        if (checkIntersectCollect() && gameView.checkIfPressed(KeyCode.E)) {
+        if (checkIntersectCollectible() && gameView.checkIfPressed(KeyCode.E)) {
             uiView.addCollectible();
             gameView.gameEntitiesRoot.getChildren().remove(dataController.getCollectibleFromCollision());
             List<Node> newCollectiblesList = dataController.getInitialCollectiblesList();
             newCollectiblesList.remove(dataController.getCollectibleFromCollision());
             dataController.setInitialCollectiblesList(newCollectiblesList);
+            System.out.println("Initial apples' array's size " + dataController.getInitialCollectiblesList().size());
         }
     }
+
     public void checkCollisionShot(Node shot) {
         for (Node platform : dataController.getPlatforms()) {
             if (shot.getBoundsInParent().intersects(platform.getBoundsInParent())) {
                 gameView.shotsPane.getChildren().remove(shot);
+//                System.out.println("removed");
                 HashMap<Node, String> newHashMap = dataController.getShotsMap();
                 newHashMap.remove(shot);
                 dataController.setShotsMap(newHashMap);
             }
         }
 
-        for (Node tree : dataController.getTrees()) {
-            if (shot.getBoundsInParent().intersects(tree.getBoundsInParent())) {
-                gameView.shotsPane.getChildren().remove(shot);
-                HashMap<Node, String> newHashMap = dataController.getShotsMap();
-                newHashMap.remove(shot);
-                dataController.setShotsMap(newHashMap);
-            }
-        }
-        for (Iterator<Node> iterator = gameView.enemiesPane.getChildren().iterator(); iterator.hasNext(); ) {
-            Node pigeon = iterator.next();
+        Collection<Node> enemiesToRemove = new ArrayList<Node>();
+        for (Node pigeon : gameView.enemiesPane.getChildren()) {
             if (pigeon.getBoundsInParent().intersects(shot.getBoundsInParent())) {
-                iterator.remove();
+                HashMap<Node, String> newShotsHashMap = dataController.getShotsMap();
                 gameView.shotsPane.getChildren().remove(shot);
-                HashMap<Node, String> newHashMap = dataController.getShotsMap();
-                newHashMap.remove(shot);
-                dataController.setShotsMap(newHashMap);
+                newShotsHashMap.remove(shot);
+                dataController.setShotsMap(newShotsHashMap);
+                enemiesToRemove.add(pigeon);
+                dataController.getEnemyClass().setCount(dataController.getEnemyClass().getCount() - 1);
+                List<Node> newEnemyList = dataController.getEnemiesList();
+                newEnemyList.remove(pigeon);
+                dataController.setEnemiesList(newEnemyList);
+                uiView.addKillScore();
             }
+
+//            if ((pigeon.getTranslateX() + 20 == dataController.getCharacterClass().getCharacter().getTranslateX()
+//                    || pigeon.getTranslateX() - 20 == dataController.getCharacterClass().getCharacter().getTranslateX())
+//                    && (pigeon.getTranslateY() + 20 == dataController.getCharacterClass().getCharacter().getTranslateY()
+//                    || pigeon.getTranslateY() - 20 == dataController.getCharacterClass().getCharacter().getTranslateY())) {
+//                System.out.println("near");
+//                enemiesToRemove.add(pigeon);
+//                dataController.getEnemyClass().setCount(dataController.getEnemyClass().getCount() - 1);
+//                List<Node> newEnemyList = dataController.getEnemiesList();
+//                newEnemyList.remove(pigeon);
+//                dataController.setEnemiesList(newEnemyList);
+//                uiView.addKillScore();
+//            }
+        }
+        if (checkCharacterEnemyCollision() && gameView.checkIfPressed(KeyCode.G)) {
+            System.out.println("bang");
+            enemiesToRemove.add(collidedPigeon);
+            dataController.getEnemyClass().setCount(dataController.getEnemyClass().getCount() - 1);
+            List<Node> newEnemyList = dataController.getEnemiesList();
+            newEnemyList.remove(collidedPigeon);
+            dataController.setEnemiesList(newEnemyList);
+            uiView.addKillScore();
+        }
+        gameView.enemiesPane.getChildren().removeAll(enemiesToRemove);
+    }
+
+    public void checkBoundaries(Node shot) {
+//        System.out.println("shot X " + shot.getTranslateX());
+        if (shot.getTranslateX() <= 0 || shot.getTranslateX() >= dataController.getLevelWidth()) {
+            gameView.shotsPane.getChildren().remove(shot);
+//            System.out.println("removed");
+            HashMap<Node, String> newHashMap = dataController.getShotsMap();
+            newHashMap.remove(shot);
+            dataController.setShotsMap(newHashMap);
         }
     }
 
@@ -109,13 +139,48 @@ public class CollisionController {
             }
         }
 
-        for(Iterator<Node> iterator = dataController.getShotsMap().keySet().iterator(); iterator.hasNext();){
+        for (Iterator<Node> iterator = dataController.getShotsMap().keySet().iterator(); iterator.hasNext(); ) {
             Node shot = iterator.next();
             checkCollisionShot(shot);
+            checkBoundaries(shot);
         }
+    }
+
+    public boolean checkCharacterEnemyCollision() {
+        boolean isColliding = false;
+        for (Node pigeon : dataController.getEnemiesList()) {
+            behaviorController.chase(pigeon);
+            if (dataController.getCharacterClass().getCharacter().getBoundsInParent().intersects(pigeon.getBoundsInParent())) {
+                collisionTime += 0.016;
+                isColliding = true;
+                collidedPigeon = pigeon;
+            }
+        }
+//        System.out.println(collisionTime);
+        return isColliding;
+    }
+
+    public boolean checkForFalling() {
+        boolean drowned = false;
+        for (Node water : dataController.getWaterPlatforms()) {
+            if (dataController.getCharacterClass().getCharacter().getBoundsInParent().intersects(water.getBoundsInParent())) {
+                System.out.println("Drowned");
+                dataController.getCharacterClass().setGravity(new Point2D(0, 0));
+                drowned = true;
+            }
+        }
+        return drowned;
     }
 
     public void checkCharacterInteraction() {
         checkForShooting();
+    }
+
+    public double getCollisionTime() {
+        return collisionTime;
+    }
+
+    public void nullifyCollisionTime() {
+        this.collisionTime = 0;
     }
 }

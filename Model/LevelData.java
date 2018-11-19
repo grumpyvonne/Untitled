@@ -7,21 +7,22 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 
 public class LevelData {
 
     public static final String[] LEVEL1 = new String[]{
-            "00000000000000000000000000000000000t000000000000000000000000000",
-            "0000000000000000000000000000000000q11p0000000000000000000000000",
-            "0000000000000000000000000000000000000000q11p0000000000000000000",
-            "0000000000000000000qp000000e00000q11p00000000000000000000000000",
-            "00000000000000000000000q11111p000000000000000000000000000000000",
-            "0000000000000000q1100000000000000000000000000000000000000000000",
-            "0000t0000001110000000000000000000000000000000000000000000000000",
-            "000q11p00e000000000000000000000000000000000000000qp000000000000",
-            "000000001110000000000000000000000000111100000000000000q1p000000",
+            "000000000t0000000000000000000000000t00000000000000000000000t000",
+            "0000000q111p0000000000000000000000q11p00000000000000000000qp000",
+            "00000000000000q11p0000000000000000000t00q11p0000000000q1p000000",
+            "0000000000000000000qp000000e00000q1111p0000000000000qp000000000",
+            "00000000000000000000000q11111p000000000000000000q1p0000000t0000",
+            "0000000000000000q11000000000000000000000000000000000000q111p000",
+            "0000t00t0001110000000000000000000000000000000001110000000000000",
+            "000q1111p00e000000000000000000000000000t00000000000qp0000000000",
+            "000000000qp0000000000000000000000000111100000000000000q1p000000",
             "0000000000000q1p0000t00000e000000000000000q111p0000000000000000",
             "00000lmr00000000000lmr000lmr0000000000000000000000lr0000000000t",
             "mmmmmfgh33lmmm333lmfgh33lfghmmmmmmmmmmmmr333333333fhmmmmmmmmmmm"
@@ -30,9 +31,10 @@ public class LevelData {
     private int levelWidth;
     private int levelHeight;
     private List<Node> platforms;
-    private List<Node> trees;
+    private List<Node> treesList;
+    private HashMap<Node, Integer> treesHashMap;
     private List<Node> waterPlatforms;
-    private List<Node> enemies;
+//    private List<Node> enemies;
     private Image rightBlock;
     private Image leftBlock;
     private Image middleBlock;
@@ -40,7 +42,6 @@ public class LevelData {
     private Image leftGroundBlock;
     private Image rightGroundBlock;
     private Image tree;
-    private Image enemyImage;
     private Image airBlockMiddle;
     private Image airBlockRight;
     private Image airBlockLeft;
@@ -77,7 +78,6 @@ public class LevelData {
         this.leftGroundBlock = new Image("images/Tile_4.png");
         this.rightGroundBlock = new Image("images/Tile_6.png");
         this.tree = new Image("images/Object_16.png");
-        this.enemyImage = new Image("images/Object_10.png");
         this.airBlockLeft = new Image("images/Tile_10.png");
         this.airBlockMiddle = new Image("images/Tile_12.png");
         this.airBlockRight = new Image("images/Tile_11.png");
@@ -95,10 +95,11 @@ public class LevelData {
 
     public void initializeContent() {
         loadImages();
+        treesHashMap = new HashMap<Node, Integer>();
         platforms = new ArrayList<>();
-        trees = new ArrayList<Node>();
+        treesList = new ArrayList<Node>();
         waterPlatforms = new ArrayList<Node>();
-        enemies = new ArrayList<Node>();
+//        enemies = new ArrayList<Node>();
         setLevelWidth(LevelData.LEVEL1[0].length() * 60);
         setLevelHeight(LevelData.LEVEL1.length);
         for (int lines = 0; lines < LevelData.LEVEL1.length; lines++) {
@@ -145,7 +146,8 @@ public class LevelData {
                         break;
                     case 't':
                         Node tree = createEntityImage(rows*60-60, lines*60-105, 180, 180, this.tree);
-                        trees.add(tree);
+                        treesList.add(tree);
+                        treesHashMap.put(tree, 0);
                         break;
                     case '3':
                         Node water = createEntity(rows * 60, lines * 60 + 20, 60, 40, Color.BLUE);
@@ -160,9 +162,12 @@ public class LevelData {
         return platforms;
     }
 
+    public HashMap<Node, Integer> getTreesHashMap() {
+        return treesHashMap;
+    }
 
-    public List<Node> getTrees() {
-        return trees;
+    public List<Node> getTreesList() {
+        return treesList;
     }
 
     public List<Node> getWaterPlatforms() {

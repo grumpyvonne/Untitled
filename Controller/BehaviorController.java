@@ -1,42 +1,51 @@
 package Controller;
 
 import Model.Character;
+import Model.Enemy;
 import Model.Shot;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
+import javafx.util.Duration;
 
 public class BehaviorController {
     private DataController dataController;
     private Character character;
+    private Enemy enemy;
     private Shot shot;
     private boolean movingLeft = false;
     private boolean movingRight = false;
 
-    public void setMovingLeft(boolean isMoving){
+    public void setMovingLeft(boolean isMoving) {
         movingLeft = isMoving;
     }
-    public void setMovingRight(boolean isMoving){
+
+    public void setMovingRight(boolean isMoving) {
         movingRight = isMoving;
     }
 
-    public boolean getMovingLeft(){
+    public boolean getMovingLeft() {
         return movingLeft;
     }
-    public boolean getMovingRight(){
+
+    public boolean getMovingRight() {
         return movingRight;
     }
 
-    public BehaviorController(DataController dataController){
+    public BehaviorController(DataController dataController) {
         this.dataController = dataController;
         this.character = dataController.getCharacterClass();
         this.shot = dataController.getShotClass();
+        this.enemy = dataController.getEnemyClass();
     }
 
-    public void moveShotLeft(Node singleShot, int speed){
+    public void moveShotLeft(Node singleShot, int speed) {
         shot.moveLeft(singleShot, speed);
     }
 
-    public void moveShotRight(Node singleShot, int speed){
+    public void moveShotRight(Node singleShot, int speed) {
         shot.moveRight(singleShot, speed);
     }
 
@@ -60,26 +69,19 @@ public class BehaviorController {
         }
     }
 
-    public void moveY(int value, Node node) {
-        boolean movingDown = value > 0;
-        for (int pixels = 0; pixels < Math.abs(value); pixels++) {
-            for (Node platform : dataController.getPlatforms()) {
-                if (node.getBoundsInParent().intersects(platform.getBoundsInParent())) {
-                    if (movingDown) {
-                        if (node.getTranslateY() + 40 == platform.getTranslateY()) {
-                            node.setTranslateY(node.getTranslateY() - 1);
-                            return;
-                        }
-                    } else {
-                        if (node.getTranslateY() == platform.getTranslateY() + 60) {
-                            return;
-                        }
-                    }
-                }
-            }
-            node.setTranslateY(node.getTranslateY() + (movingDown ? 1 : -1));
+    public void chase(Node node) {
+        if (Math.abs(character.getCharacter().getTranslateX() - node.getTranslateX()) < 300 && Math.abs(character.getCharacter().getTranslateY() - node.getTranslateY()) < 400) {
+            Timeline timeline = new Timeline();
+            timeline.setCycleCount(Timeline.INDEFINITE);
+            timeline.setAutoReverse(true);
+            KeyValue kvx = new KeyValue(node.translateXProperty(), character.getCharacter().getTranslateX());
+            KeyValue kvy = new KeyValue(node.translateYProperty(), character.getCharacter().getTranslateY());
+            KeyFrame kf = new KeyFrame(Duration.seconds(2), kvx, kvy);
+            timeline.getKeyFrames().add(kf);
+            timeline.play();
         }
     }
+
 
     public void moveCharacterY(int value) {
         boolean movingDown = value > 0;
@@ -110,11 +112,11 @@ public class BehaviorController {
         }
     }
 
-    public void setCanJump(boolean bool){
+    public void setCanJump(boolean bool) {
         character.setCanJump(bool);
     }
 
-    public boolean getCanJump(){
+    public boolean getCanJump() {
         return character.getCanJump();
     }
 

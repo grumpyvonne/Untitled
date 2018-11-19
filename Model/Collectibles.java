@@ -36,7 +36,7 @@ public class Collectibles {
         return this.count;
     }
 
-    public Image getAppleCollectable() {
+    public Image getAppleCollectible() {
         return appleCollectable;
     }
 }

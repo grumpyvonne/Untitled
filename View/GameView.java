@@ -24,6 +24,7 @@ public class GameView {
     public Pane gameEntitiesRoot;
     public Pane shotsPane;
     public Pane enemiesPane;
+    public Pane collectiblesPane;
     private Stage gameStage;
     private Scene gameScene;
     private Node background;
@@ -52,6 +53,7 @@ public class GameView {
         gameEntitiesRoot = new Pane();
         shotsPane = new Pane();
         enemiesPane = new Pane();
+        collectiblesPane = new Pane();
         gameStage.hide();
         setBackground();
         mainPane.getChildren().addAll(background, gameEntitiesRoot, uiRoot);
@@ -92,9 +94,10 @@ public class GameView {
     private void initializeEntities() {
         gameEntitiesRoot.getChildren().addAll(dataController.getPlatforms());
         gameEntitiesRoot.getChildren().addAll(dataController.getWaterPlatforms());
-        gameEntitiesRoot.getChildren().addAll(dataController.getTrees());
+        gameEntitiesRoot.getChildren().addAll(dataController.getTreesList());
         gameEntitiesRoot.getChildren().addAll(dataController.getInitialCollectiblesList());
-        enemiesPane.getChildren().addAll(dataController.getEnemies());
+        enemiesPane.getChildren().addAll(dataController.getEnemiesList());
+//        gameEntitiesRoot.getChildren().addAll(collectiblesPane);
         gameEntitiesRoot.getChildren().addAll(enemiesPane);
         gameEntitiesRoot.getChildren().addAll(shotsPane);
         gameEntitiesRoot.getChildren().add(this.character.getCharacter());
@@ -115,21 +118,42 @@ public class GameView {
         });
     }
 
+    private void updateCollectibles() {
+        if (dataController.waitForCollectibles()) {
+//            System.out.println("updating");
+            for (Node apple : dataController.getInitialCollectiblesList()) {
+//                if (!collectiblesPane.getChildren().contains(apple)) {
+//                    collectiblesPane.getChildren().add(apple);
+//                }
+                if (!gameEntitiesRoot.getChildren().contains(apple)) {
+                    gameEntitiesRoot.getChildren().add(apple);
+                }
+            }
+        }
+    }
+
     private void createGameLoop() {
         AnimationTimer timer = new AnimationTimer() {
             @Override
             public void handle(long l) {
                 keysListeners();
-                updateCharacterMovement();
-                collisionController.checkCollisions();
-                collisionController.checkCharacterInteraction();
                 createEnemy();
+                updateCharacterMovement();
+                updateCollectibles();
+                collisionController.checkCollectingResources();
+                collisionController.checkCharacterInteraction();
                 if (checkDeath()) {
                     uiView.removeLife();
                     if (statusController.getLivesCount() > 0)
-                        behaviorController.getCharacter().setTranslateX(0);
+//                        try {
+//                            Thread.sleep(500);
+//                        } catch (Exception e) {
+//                            e.printStackTrace();
+//                        }
+                        gameEntitiesRoot.setLayoutX(0);
+                    gameEntitiesRoot.setLayoutY(dataController.getLevelHeight());
+                    behaviorController.getCharacter().setTranslateX(0);
                     behaviorController.getCharacter().setTranslateY(620);
-                    gameEntitiesRoot.setLayoutX(0);
                 } else if (statusController.getLivesCount() == 0) {
                     this.stop();
                     Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -138,10 +162,23 @@ public class GameView {
                     alert.show();
                     gameStage.close();
                 }
+                if (statusController.getCollectiblesCount() > 100){
+                    this.stop();
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setContentText("You won");
+                    alert.setHeaderText(null);
+                    alert.show();
+                    gameStage.close();
+                }
             }
         };
         timer.start();
     }
+
+//    private void updateEnemyMovement() {
+//        for (Node node : dataController.getEnemiesList())
+//            behaviorController.flyDown(node, 2);
+//    }
 
     private void updateCharacterMovement() {
         if (keyIsPressed(KeyCode.D) && behaviorController.getCharacter().getTranslateX() + 40 <= dataController.getLevelWidth() - 5) {
@@ -168,21 +205,33 @@ public class GameView {
     }
 
     private void createEnemy() {
+        int level = dataController.checkLevel();
         time += 0.016;
-        if (time > 10) {
-            Node singleEnemy = dataController.createEnemy(700, 280);
-            enemiesPane.getChildren().addAll(singleEnemy);
-        }
-        if (time > 10) {
+        if (time > 2 && dataController.getEnemyClass().getCount() < level) {
+            dataController.createEnemy();
+            for (Node enemy : dataController.getEnemiesList()) {
+                if (!enemiesPane.getChildren().contains(enemy)) {
+                    enemiesPane.getChildren().add(enemy);
+                }
+            }
             time = 0;
         }
     }
 
     private boolean checkDeath() {
-        if (dataController.checkForFalling()) {
+        boolean isDead = false;
+        if (collisionController.checkForFalling()) {
             keys.keySet().forEach(key -> keys.put(key, false));
-            return true;
-        } else return false;
+            isDead = true;
+        }
+        if (collisionController.checkCharacterEnemyCollision()) {
+            System.out.println(collisionController.getCollisionTime());
+            if (collisionController.getCollisionTime() > 2) {
+                isDead = true;
+                collisionController.nullifyCollisionTime();
+            }
+        }
+        return isDead;
     }
 
     public void setBackground() {

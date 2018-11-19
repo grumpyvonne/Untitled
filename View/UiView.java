@@ -1,6 +1,5 @@
 package View;
 
-import Controller.DataController;
 import Controller.StatusController;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -15,7 +14,8 @@ public class UiView {
     private Image collImage;
     private ImageView[] livesArr;
     private StatusController statusController;
-    private Text text;
+    private Text textCollectible;
+    private Text textScore;
 
     public UiView(StatusController statusController) {
         this.statusController = statusController;
@@ -24,6 +24,7 @@ public class UiView {
         uiRoot.getChildren().add(uiLives);
         initializeLives();
         initializeCollectibles();
+        initializeKillsScore();
     }
 
     private void initializeLives() {
@@ -42,26 +43,49 @@ public class UiView {
         collectible.setLayoutX(500);
         collectible.setLayoutY(10);
         this.uiRoot.getChildren().add(collectible);
-        text = new Text();
-        text.setText(Integer.toString( statusController.getCollectiblesCount()));
-        text.setFont(Font.font("Verdana", 20));
-        text.setTranslateX(540);
-        text.setTranslateY(30);
-        this.uiRoot.getChildren().add(text);
+        textCollectible = new Text();
+        textCollectible.setText(Integer.toString( statusController.getCollectiblesCount()));
+        textCollectible.setFont(Font.font("Verdana", 20));
+        textCollectible.setTranslateX(540);
+        textCollectible.setTranslateY(30);
+        this.uiRoot.getChildren().add(textCollectible);
+    }
+
+    private void initializeKillsScore(){
+        Image killsImage = new Image("images/pigeon.png", 40, 40, true, true);
+        ImageView kills = new ImageView(killsImage);
+        kills.setLayoutX(1000);
+        kills.setLayoutY(10);
+        this.uiRoot.getChildren().add(kills);
+        textScore = new Text();
+        textScore.setText(Integer.toString(statusController.getScore()));
+        textScore.setFont(Font.font("Verdana", 20));
+        textScore.setTranslateX(1050);
+        textScore.setTranslateY(30);
+        this.uiRoot.getChildren().add(textScore);
+    }
+
+    public void addKillScore(){
+        statusController.setScore(statusController.getScore() + 60);
+        updateScore();
+    }
+
+    public void updateScore(){
+        textScore.setText(Integer.toString(statusController.getScore()));
     }
 
 
     public void addCollectible(){
-        if(statusController.getCollectiblesCount() < 10) {
+//        if(statusController.getCollectiblesCount() < 10) {
             statusController.setCollectiblesCount(statusController.getCollectiblesCount() + 1);
-            text.setText(Integer.toString(statusController.getCollectiblesCount()));
-        }
+            textCollectible.setText(Integer.toString(statusController.getCollectiblesCount()));
+//        }
     }
 
     public void removeCollectible(){
 //        if(statusController.getCollectiblesCount() > 0){
             statusController.setCollectiblesCount(statusController.getCollectiblesCount() - 1);
-            text.setText(Integer.toString(statusController.getCollectiblesCount()));
+            textCollectible.setText(Integer.toString(statusController.getCollectiblesCount()));
 //        }
     }
 

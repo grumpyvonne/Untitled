@@ -1,6 +1,5 @@
 package View;
 
-import Controller.Menu;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
@@ -14,7 +13,6 @@ public class MainView {
     private Pane mainPane;
     private Scene mainScene;
     private Stage mainStage;
-    private Menu menu;
 
 
     public MainView() {
@@ -22,7 +20,6 @@ public class MainView {
         mainScene = new Scene(mainPane, WIDTH, HEIGHT);
         mainStage = new Stage();
         mainStage.setScene(mainScene);
-        menu = new Menu();
         initialize();
     }
 
@@ -50,9 +47,6 @@ public class MainView {
         return this.mainStage;
     }
 
-    public Menu getMenu() {
-        return this.menu;
-    }
 }
 
 
