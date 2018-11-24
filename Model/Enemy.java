@@ -1,6 +1,5 @@
 package Model;
 
-import javafx.scene.Node;
 import javafx.scene.image.ImageView;
 
 public class Enemy {
@@ -20,14 +19,6 @@ public class Enemy {
         enemy.setPreserveRatio(true);
         setCount(getCount() + 1);
         return enemy;
-    }
-
-    public void moveDown(Node node, int speed){
-        node.setTranslateY(node.getTranslateY() + speed);
-    }
-
-    public void stop(Node node){
-        node.setTranslateX(node.getTranslateX());
     }
 
     public void setCount(int newCount){

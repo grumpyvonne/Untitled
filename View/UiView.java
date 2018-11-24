@@ -11,7 +11,6 @@ public class UiView {
     private Pane uiRoot;
     private Pane uiLives;
     private Image lifeImage;
-    private Image collImage;
     private ImageView[] livesArr;
     private StatusController statusController;
     private Text textCollectible;
@@ -66,7 +65,7 @@ public class UiView {
     }
 
     public void addKillScore(){
-        statusController.setScore(statusController.getScore() + 60);
+        statusController.setScore(statusController.getScore() + 10);
         updateScore();
     }
 
@@ -76,17 +75,15 @@ public class UiView {
 
 
     public void addCollectible(){
-//        if(statusController.getCollectiblesCount() < 10) {
             statusController.setCollectiblesCount(statusController.getCollectiblesCount() + 1);
             textCollectible.setText(Integer.toString(statusController.getCollectiblesCount()));
-//        }
     }
 
     public void removeCollectible(){
-//        if(statusController.getCollectiblesCount() > 0){
+        if(statusController.getCollectiblesCount() > 0){
             statusController.setCollectiblesCount(statusController.getCollectiblesCount() - 1);
             textCollectible.setText(Integer.toString(statusController.getCollectiblesCount()));
-//        }
+        }
     }
 
 

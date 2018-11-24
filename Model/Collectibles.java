@@ -3,20 +3,15 @@ package Model;
 import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.text.Font;
-import javafx.scene.text.Text;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class Collectibles {
 
     private int count;
-    private Image appleCollectable;
+    private Image appleCollectible;
 
     public Collectibles() {
         this.count = 0;
-        appleCollectable = new Image("images/coll.png", 30, 30, true, true);
+        appleCollectible = new Image("images/coll.png", 30, 30, true, true);
     }
 
 
@@ -37,6 +32,6 @@ public class Collectibles {
     }
 
     public Image getAppleCollectible() {
-        return appleCollectable;
+        return appleCollectible;
     }
 }

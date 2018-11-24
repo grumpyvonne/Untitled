@@ -20,7 +20,6 @@ public class DataController {
     private HashMap<Node, Integer> treesHashMap;
     private List<Node> waterPlatforms;
     private List<Node> initialCollectiblesList;
-    private List<Node> collectiblesList;
     private Character character;
     private Collectibles collectibles;
     private Shot shot;
@@ -29,13 +28,11 @@ public class DataController {
     private HashMap<Node, String> shotsMap;
     private double time = 0;
     private int level = 0;
-//    private boolean isUpdatedColl = false;
 
     public DataController(StatusController statusController, Character character) {
         this.statusController = statusController;
         shotsMap = new HashMap<Node, String>();
         initialCollectiblesList = new ArrayList<>();
-        collectiblesList = new ArrayList<>();
         levelData = new LevelData();
         collectibles = new Collectibles();
         shot = new Shot();
@@ -72,7 +69,6 @@ public class DataController {
         boolean isUpdatedColl = false;
         if (initialCollectiblesList.size() == 0) {
             time += 0.016;
-            System.out.println(time);
             updateCollectibles();
             isUpdatedColl = true;
         }
@@ -85,22 +81,10 @@ public class DataController {
             for (Node tree : treesList) {
                 initialCollectiblesList.add(collectibles.createCollectible((int) (tree.getTranslateX() + 40), (int) (tree.getTranslateY() + 20), statusController.getCollectibleImageA()));
                 initialCollectiblesList.add(collectibles.createCollectible((int) (tree.getTranslateX() + 80), (int) (tree.getTranslateY() + 40), statusController.getCollectibleImageA()));
-                System.out.println("coll size - " + initialCollectiblesList.size());
             }
             time = 0;
         }
     }
-
-//    public void updateCollectibles() {
-//        for (Map.Entry<Node, Integer> tree : treesHashMap.entrySet()) {
-//            if (tree.getValue() < 2) {
-//                collectiblesList.add(collectibles.createCollectible((int) (tree.getKey().getTranslateX() + 40), (int) (tree.getKey().getTranslateY() + 20), statusController.getCollectibleImageA()));
-//                treesHashMap.put(tree.getKey(), tree.getValue() + 1);
-//                collectiblesList.add(collectibles.createCollectible((int) (tree.getKey().getTranslateX() + 80), (int) (tree.getKey().getTranslateY() + 40), statusController.getCollectibleImageA()));
-//                treesHashMap.put(tree.getKey(), tree.getValue() + 1);
-//            }
-//        }
-//    }
 
     public ImageView createShot() {
         ImageView singleShot = shot.createShot((int) character.getCharacter().getTranslateX(), (int) character.getCharacter().getTranslateY(), 30, 30, "images/coll.png");
@@ -116,7 +100,7 @@ public class DataController {
 
     public int checkLevel() {
         if (statusController.getCollectiblesCount() < 10)
-            level = 2;
+            level = 3;
         else if(statusController.getCollectiblesCount() > 10)
             level = 4;
         else if (statusController.getCollectiblesCount() > 20)
@@ -175,10 +159,6 @@ public class DataController {
 
     public List<Node> getTreesList() {
         return treesList;
-    }
-
-    public HashMap<Node, Integer> getTreesHashMap() {
-        return treesHashMap;
     }
 
     public List<Node> getPlatforms() {

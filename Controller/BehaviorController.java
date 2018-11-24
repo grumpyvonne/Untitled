@@ -70,13 +70,13 @@ public class BehaviorController {
     }
 
     public void chase(Node node) {
-        if (Math.abs(character.getCharacter().getTranslateX() - node.getTranslateX()) < 300 && Math.abs(character.getCharacter().getTranslateY() - node.getTranslateY()) < 400) {
+        if (Math.abs(character.getCharacter().getTranslateX() - node.getTranslateX()) < 700 && Math.abs(character.getCharacter().getTranslateY() - node.getTranslateY()) < 700) {
             Timeline timeline = new Timeline();
             timeline.setCycleCount(Timeline.INDEFINITE);
             timeline.setAutoReverse(true);
             KeyValue kvx = new KeyValue(node.translateXProperty(), character.getCharacter().getTranslateX());
             KeyValue kvy = new KeyValue(node.translateYProperty(), character.getCharacter().getTranslateY());
-            KeyFrame kf = new KeyFrame(Duration.seconds(2), kvx, kvy);
+            KeyFrame kf = new KeyFrame(Duration.seconds(1), kvx, kvy);
             timeline.getKeyFrames().add(kf);
             timeline.play();
         }

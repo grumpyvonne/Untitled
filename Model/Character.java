@@ -14,7 +14,6 @@ public class Character {
     public Character(int x, int y, int width, int height, String url) {
         setCharacter(createCharacter(x, y, width, height, url));
         gravity = new Point2D(0, 0);
-//        canJump = true;
     }
 
 

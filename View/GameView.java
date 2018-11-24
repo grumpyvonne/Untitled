@@ -74,7 +74,6 @@ public class GameView {
                 keys.put(keyEvent.getCode(), true);
         });
         gameScene.setOnKeyReleased(keyEvent -> keys.remove(keyEvent.getCode()));
-//        gameScene.setOnKeyReleased(keyEvent -> keys.put(keyEvent.getCode(), false));
     }
 
     private boolean keyIsPressed(KeyCode key) {
@@ -97,7 +96,6 @@ public class GameView {
         gameEntitiesRoot.getChildren().addAll(dataController.getTreesList());
         gameEntitiesRoot.getChildren().addAll(dataController.getInitialCollectiblesList());
         enemiesPane.getChildren().addAll(dataController.getEnemiesList());
-//        gameEntitiesRoot.getChildren().addAll(collectiblesPane);
         gameEntitiesRoot.getChildren().addAll(enemiesPane);
         gameEntitiesRoot.getChildren().addAll(shotsPane);
         gameEntitiesRoot.getChildren().add(this.character.getCharacter());
@@ -120,11 +118,7 @@ public class GameView {
 
     private void updateCollectibles() {
         if (dataController.waitForCollectibles()) {
-//            System.out.println("updating");
             for (Node apple : dataController.getInitialCollectiblesList()) {
-//                if (!collectiblesPane.getChildren().contains(apple)) {
-//                    collectiblesPane.getChildren().add(apple);
-//                }
                 if (!gameEntitiesRoot.getChildren().contains(apple)) {
                     gameEntitiesRoot.getChildren().add(apple);
                 }
@@ -145,11 +139,6 @@ public class GameView {
                 if (checkDeath()) {
                     uiView.removeLife();
                     if (statusController.getLivesCount() > 0)
-//                        try {
-//                            Thread.sleep(500);
-//                        } catch (Exception e) {
-//                            e.printStackTrace();
-//                        }
                         gameEntitiesRoot.setLayoutX(0);
                     gameEntitiesRoot.setLayoutY(dataController.getLevelHeight());
                     behaviorController.getCharacter().setTranslateX(0);
@@ -174,11 +163,6 @@ public class GameView {
         };
         timer.start();
     }
-
-//    private void updateEnemyMovement() {
-//        for (Node node : dataController.getEnemiesList())
-//            behaviorController.flyDown(node, 2);
-//    }
 
     private void updateCharacterMovement() {
         if (keyIsPressed(KeyCode.D) && behaviorController.getCharacter().getTranslateX() + 40 <= dataController.getLevelWidth() - 5) {
@@ -225,7 +209,6 @@ public class GameView {
             isDead = true;
         }
         if (collisionController.checkCharacterEnemyCollision()) {
-            System.out.println(collisionController.getCollisionTime());
             if (collisionController.getCollisionTime() > 2) {
                 isDead = true;
                 collisionController.nullifyCollisionTime();

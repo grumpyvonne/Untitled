@@ -34,7 +34,6 @@ public class LevelData {
     private List<Node> treesList;
     private HashMap<Node, Integer> treesHashMap;
     private List<Node> waterPlatforms;
-//    private List<Node> enemies;
     private Image rightBlock;
     private Image leftBlock;
     private Image middleBlock;
@@ -99,7 +98,6 @@ public class LevelData {
         platforms = new ArrayList<>();
         treesList = new ArrayList<Node>();
         waterPlatforms = new ArrayList<Node>();
-//        enemies = new ArrayList<Node>();
         setLevelWidth(LevelData.LEVEL1[0].length() * 60);
         setLevelHeight(LevelData.LEVEL1.length);
         for (int lines = 0; lines < LevelData.LEVEL1.length; lines++) {
