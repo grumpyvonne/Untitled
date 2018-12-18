@@ -8,6 +8,7 @@ public class Collectibles {
 
     private int count;
     private Image appleCollectible;
+    private ImageView singleCollectible;
 
     public Collectibles() {
         this.count = 0;
@@ -16,10 +17,10 @@ public class Collectibles {
 
 
     public Node createCollectible(int x, int y, Image image) {
-        ImageView collectible = new ImageView(image);
-        collectible.setTranslateX(x);
-        collectible.setTranslateY(y);
-        return collectible;
+        singleCollectible = new ImageView(image);
+        singleCollectible.setTranslateX(x);
+        singleCollectible.setTranslateY(y);
+        return singleCollectible;
     }
 
 

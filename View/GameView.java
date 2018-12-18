@@ -39,7 +39,7 @@ public class GameView {
 
 
     public GameView() {
-        character = new Character(0, 620, 40, 40, "images/Object_11.png");
+        character = new Character(0, 620, 40, 40, "images/animal.png");
         statusController = new StatusController();
         uiView = new UiView(this.statusController);
         dataController = new DataController(statusController, character);
